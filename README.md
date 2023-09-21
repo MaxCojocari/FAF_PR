@@ -1,2 +1,2 @@
 # FAF_PR
-Repository for laboratory works on the Network Programming course
+Repository for laboratory assignments related to the Network Programming course.
