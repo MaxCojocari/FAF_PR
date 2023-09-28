@@ -2,9 +2,10 @@
 
 ## Class Task
 
-Change `max_page_num` in `main` to a predifined number you want to set.
+Change `start_url` and `max_page_num` in `main` to a predifined number you want to set.
 
 ```py
+start_url = "https://999.md/ro/list/transport/cars"
 scrape_links(start_url, max_page_num=10)
 ```
 
