@@ -43,7 +43,7 @@ def get_links_to_products(response, url_base='https://999.md'):
         for link in links:
             href = link.get('href')
             if href and re.match(r'/ro/\d+', href):
-                print(urljoin(url_base, href))
+                # print(urljoin(url_base, href))
                 file.write(urljoin(url_base, href) + '\n')
               
 
