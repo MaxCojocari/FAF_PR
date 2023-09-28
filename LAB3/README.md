@@ -40,7 +40,7 @@ https://999.md/ro/84336684
 
 ## Homework
 
-Modify `base_url` field with url of your choice in `main` section and run `python3 homework.py` in order to view scrapped content in `homework.json`.
+Modify `base_url` field with url of your choice in `main` section and run `python3 homework.py` in order to view scrapped content in `homework.json`. This implementation is based for ads from `https://999.md/ro/list/transport/cars`.
 
 ```py
 base_url = "https://999.md/ro/83927441"

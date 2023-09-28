@@ -5,9 +5,6 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
 def scrape_links(url, max_page_num):
-    if not re.search(r'\?page', url):
-        url += '?page=1'
-
     page_nr_limit = get_pagination_limit(get_response(url))
     
     if page_nr_limit and max_page_num > page_nr_limit:
@@ -22,15 +19,19 @@ def scrape_links(url, max_page_num):
 
     while True:
         response = get_response(url)
-        page_nr = int(url.split('page=')[1])
+        page_nr = 0
+        url_frag = url.split('page=')
+        
+        if len(url_frag) > 1:
+            page_nr = int(url_frag[1])
 
-        if page_nr > max_page_num:
+        if page_nr != 0 and page_nr > max_page_num:
             return
 
         get_links_to_products(response)
         url = get_next_url_from_pagination(response)
         
-        if not url:
+        if url is None:
             return 
 
         continue
@@ -43,7 +44,6 @@ def get_links_to_products(response, url_base='https://999.md'):
         for link in links:
             href = link.get('href')
             if href and re.match(r'/ro/\d+', href):
-                print(urljoin(url_base, href))
                 file.write(urljoin(url_base, href) + '\n')
               
 
@@ -83,5 +83,5 @@ def get_response(url):
     return response
 
 if __name__ == "__main__":
-    start_url = "https://999.md/ro/list/transport/cars"
+    start_url = "https://999.md/ru/list/real-estate/apartments-and-rooms?o_30_241=894&applied=1&eo=12900&eo=12912&eo=12885&eo=13859&ef=32&ef=33&o_33_1=776"
     scrape_links(start_url, max_page_num=10)
