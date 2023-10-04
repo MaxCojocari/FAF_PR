@@ -36,7 +36,7 @@ Content-Type: text/html
 
 The TCP parser implementation can be found in `homework.py`.
 
-For running the parser use `python3 homework.py`.
+For running the parser use `python3 homework.py`. Make sure the `in_class.py` server is running!
 
 This is a parser that operates on a queue-based system. It systematically explores all pages and extracts URLs (href links) from each page, continuing this process recursively until no more sublinks are found (queue is empty). The client for this web scraper establishes a connection with the server using sockets and relies on TCP as its primary communication protocol.
 
