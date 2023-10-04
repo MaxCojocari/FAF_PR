@@ -23,7 +23,7 @@ def send_http_request(path):
     request = f"GET {path} HTTP/1.1\r\nHost: {HOST}:{PORT}\r\n\r\n"
     client_socket.sendall(request.encode('utf-8'))
 
-    # Receive and print the response from the server
+    # Receive the response from the server
     response = client_socket.recv(1024).decode('utf-8')
         
     # Split the response at the double newline to separate headers and HTML content
@@ -99,7 +99,3 @@ if __name__ == "__main__":
                 new_path = urlparse(href).path
                 queue.append(new_path)
                 seen.add(new_path)
-
-    
-    for path in paths:
-        send_http_request(path)
