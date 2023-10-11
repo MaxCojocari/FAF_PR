@@ -46,6 +46,9 @@ def handle_input_message(client_socket: socket):
 
     elif message.lower() == 'upload':
         message_json = handle_upload()
+
+    elif message.lower() == 'download':
+        message_json = handle_download()
     
     else:
         print("Wrong message type!")
@@ -60,7 +63,7 @@ def handle_input_message(client_socket: socket):
 
 def handle_connect():
     global name
-    room = input('Enter room name: ')
+    room = input('Enter room: ')
     if not name:
         name = input('Enter your name: ')
 
@@ -73,7 +76,7 @@ def handle_connect():
     }
 
 def handle_disconnect():
-    room = input('Enter room name to disconnect: ')
+    room = input('Enter room to disconnect: ')
 
     return {
         "type": "disconnect",
@@ -91,7 +94,7 @@ def handle_message():
         sender = input("Please, enter your name: ", )
         name = str(sender)
     
-    room = input('Enter room name: ')
+    room = input('Enter room: ')
     text = input('Enter message: ')
 
     return {
@@ -105,7 +108,7 @@ def handle_message():
 
 def handle_upload():
     path = input('Enter relative path to file: ')
-    room = input('Enter your room: ')
+    room = input('Enter room: ')
     
     if not os.path.exists(path):
         print(f"Path {path} does not exist!")
@@ -125,16 +128,46 @@ def handle_upload():
         }
     }
 
-def receive_messages(client_socket: socket):
+def handle_download():
+    file_name = input('Enter name of file to download: ')
+    room = input('Enter room: ')
+
+    return {
+        "type": "download",
+        "payload": {
+            "room": room,
+            "file_name": file_name,
+        }
+    }
+
+def receive_messages(client_socket):    
     while True:
-        message = client_socket.recv(1024).decode('utf-8')
-        if not message:
-            break
-        message = json.loads(message)
+        length_header = client_socket.recv(1024)
+        message_length = int.from_bytes(length_header, byteorder='big')
+
+        full_data = b""
+
+        while len(full_data) < message_length:
+            data = client_socket.recv(1024)
+            full_data += data
+
+        ##########################
+        ##########################
+        message = json.loads(full_data.decode('utf-8'))
+        # message = client_socket.recv(1024).decode('utf-8')
+        # if not message:
+        #     break
+        # message = json.loads(message)
         
 
+        # if 'type' in message:
+        #     if message["type"] == "download_ack";
+                
+        # else:
+        #     raise KeyError()        
+        
         if 'message' in message['payload'].keys():
-            print(f"Received: {message['payload']['message']}")
+            print(message['payload']['message'])
         else:
             raise KeyError()
 
