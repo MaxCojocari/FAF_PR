@@ -26,24 +26,24 @@ When testing, if `Enter message type...` does not appear in console, press Enter
 
   - Checks if the file exists at the provided path, if not raises an error. Only client observes this error;
 
-        ```
+        
         Enter message type (or 'exit' to quit):
         upload
         Enter relative path to file: test/abracadabra.txt
         File abracadabra.txt does not exist!
-        ```
+        
 
   - If it exists, it's uploaded to the server. Other members of the room are acknowledged about upload event;
 
-        ```
+        
         User alice uploaded sky.jpg file.
-        ```
+        
 
   - All files are saved in a `server_media` directory on the server, organized uniquely by room.
 
     ![Alt text](../assets/LAB5/image-1.png)
 
-    - During the upload process, the file (whether it's a `txt` or an image) is transformed into bytes, segmented into chunks each of `BUFFER_SIZE` length, and transmitted to the server. Initially, the file's size is dispatched, followed by the sequential transmission of all chunks. The following logic is implemented both in server (download request) and client (upload);
+  - During the upload process, the file (whether it's a `txt` or an image) is transformed into bytes, segmented into chunks each of `BUFFER_SIZE` length, and transmitted to the server. Initially, the file's size is dispatched, followed by the sequential transmission of all chunks. The following logic is implemented both in server (download request) and client (upload);
 
       ```python
       data = json.dumps(message_json).encode('utf-8')
@@ -52,7 +52,7 @@ When testing, if `Enter message type...` does not appear in console, press Enter
       client_socket.send(json.dumps(message_json).encode('utf-8'))
       ```
 
-    - The receiver of byte chunks reasembles them back and saves in created file buffer.
+  - The receiver of byte chunks reasembles them back and saves in created file buffer.
 
       ```python
       length_header = client_socket.recv(BUFFER_SIZE)
@@ -81,12 +81,12 @@ When testing, if `Enter message type...` does not appear in console, press Enter
 
   - Checks if the file exists in the `server_media` directory under the respective room;
 
-        ```
+        
         Enter message type (or 'exit' to quit):
         download
         Enter name of file to download: eryuy.ee
         The 'eryuy.ee' does not exist!
-        ```
+        
 
   - If everything is OK, the client downloads requested file in his unique media folder.
 
