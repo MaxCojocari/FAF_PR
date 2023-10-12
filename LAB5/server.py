@@ -3,14 +3,13 @@ import threading
 import json
 import base64
 import os
-import uuid
 
 HOST = '127.0.0.1'
 PORT = 8080
+BUFFER_SIZE = 1024
 
 clients = []
 rooms = {}
-uuids = {}
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,6 +41,9 @@ def handle_client(client_socket, client_address):
         if message["type"] == "upload":
             handle_upload_request(message, client_socket, client_address)
 
+        if message["type"] == "download":
+            handle_download_request(message, client_socket, client_address)
+
     client_socket.close()
 
 def handle_connect_request(message, client_socket, client_address):
@@ -64,7 +66,6 @@ def handle_connect_request(message, client_socket, client_address):
     }
     
     send_response_message(message_json, client_socket)
-    # client_socket.send(json.dumps(message_json).encode('utf-8'))
 
     notification_message_json = {
         "type": "notification",
@@ -76,7 +77,6 @@ def handle_connect_request(message, client_socket, client_address):
     for member in rooms[message["payload"]["room"]]:
         if member["address"] != client_address:
             send_response_message(notification_message_json, member["socket"])
-            # member["socket"].send(json.dumps(notification_message_json).encode('utf-8'))
 
 def handle_message_request(message, client_socket, client_address):
     if not message["payload"]["room"] in rooms.keys():
@@ -86,7 +86,6 @@ def handle_message_request(message, client_socket, client_address):
             }
         }
         send_response_message(err_message, client_socket)
-        # client_socket.send(json.dumps(err_message).encode('utf-8'))
         return 
     
     chat_members = rooms[message["payload"]["room"]]
@@ -97,7 +96,6 @@ def handle_message_request(message, client_socket, client_address):
             }
         }
         send_response_message(err_message, client_socket)
-        # client_socket.send(json.dumps(err_message).encode('utf-8'))
         return
 
     new_msg = {
@@ -108,7 +106,6 @@ def handle_message_request(message, client_socket, client_address):
     for member in chat_members:
         if member["address"] != client_address:
             send_response_message(new_msg, member["socket"])
-            # member["socket"].send(json.dumps(new_msg).encode('utf-8'))
 
 def handle_upload_request(message, client_socket, client_address):
     # Check if room exists
@@ -120,10 +117,9 @@ def handle_upload_request(message, client_socket, client_address):
             }
         }
         send_response_message(err_message, client_socket)
-        # client_socket.send(json.dumps(err_message).encode('utf-8'))
         return
     
-    # Check if user exists in chat room
+    # Check if user exists in chat room, if not send an error msg to client
     chat_members = rooms[message["payload"]["room"]]
     if not is_member_exist(client_address, chat_members):
         err_message = {
@@ -133,59 +129,61 @@ def handle_upload_request(message, client_socket, client_address):
             }
         }
         send_response_message(err_message, client_socket)
-        # client_socket.send(json.dumps(err_message).encode('utf-8'))
         return
 
     # Convert receied bytes into suitable file format
     decoded_bytes = base64.b64decode(message["payload"]["data"])
-
-    if message["payload"]["room"] not in uuids.keys():
-        uuids[message["payload"]["room"]] = {}
-    if client_address not in uuids[message["payload"]["room"]].keys():
-        generated_uuid = str(uuid.uuid1())
-        uuids[message["payload"]["room"]][client_address] = generated_uuid
     
-    user_uuid = uuids[message["payload"]["room"]][client_address]
-    
-    path = "server_media/" + message["payload"]["room"] + "/" + user_uuid 
-
+    # Set new path for uploaded file
+    path = os.path.join("server_media", message["payload"]["room"])
     if not os.path.exists(path):
         os.makedirs(path)
-    
-    path = path + "/" + message["payload"]["file_name"]
+    path = os.path.join(path, message["payload"]["file_name"])
 
     # Save in the specified directory
     with open(path, 'wb') as f:
         f.write(decoded_bytes)
 
+    # Acknowledge other members of the room about uploading event
     sender_name = get_sender_name(message, client_address);
     new_msg = {
         'type': 'upload_ack',
         'payload': {
-            'message': f"User {sender_name} uploaded {message['payload']['file_name']} file"
+            'message': f"User {sender_name} uploaded {message['payload']['file_name']} file."
         }
     }
     chat_members = rooms[message["payload"]["room"]]
-    
     for member in chat_members:
         if member["address"] != client_address:
             send_response_message(new_msg, member["socket"])
-            # member["socket"].send(json.dumps(new_msg).encode('utf-8'))
 
 def handle_download_request(message, client_socket, client_address):
-    path = get_file(message["payload"]["file_name"])
-    
-    if not path:
+    # Check if user exists in chat room
+    room = message["payload"]["room"]
+    if room not in rooms.keys() or not is_member_exist(client_address, rooms[room]):
         err_message = {
             'type': 'error',
             'payload': {
-                'message': f"'{message['payload']['file_name']}' does not exist!"
+                'message': f"You do not belong to {room} room!"
             }
         }
         send_response_message(err_message, client_socket)
-        # client_socket.send(json.dumps(err_message).encode('utf-8'))
         return
     
+    # Check if file exists in room directory, if not send an error msg to client
+    file_name = message["payload"]["file_name"]
+    path = os.path.join("server_media", room, file_name)
+    if not os.path.exists(path):
+        err_message = {
+            'type': 'error',
+            'payload': {
+                'message': f"The '{message['payload']['file_name']}' does not exist!"
+            }
+        }
+        send_response_message(err_message, client_socket)
+        return
+    
+    # Convert file (either txt or image) to bytes and send them in chunks to client
     with open(path, 'rb') as file:
         file_bytes = file.read()
 
@@ -194,7 +192,7 @@ def handle_download_request(message, client_socket, client_address):
     message_json = {
         "type": "download_ack",
         "payload": {
-            "file_name": os.path.basename(path),
+            "file_name": file_name,
             "data": encoded_data
         }
     }
@@ -205,7 +203,7 @@ def receive_message(client_socket):
     if not client_socket:
         return {}
     
-    length_header = client_socket.recv(1024)
+    length_header = client_socket.recv(BUFFER_SIZE)
     if not length_header:
         return None
     message_length = int.from_bytes(length_header, byteorder='big')
@@ -213,7 +211,7 @@ def receive_message(client_socket):
     full_data = b""
 
     while len(full_data) < message_length:
-        data = client_socket.recv(1024)
+        data = client_socket.recv(BUFFER_SIZE)
         full_data += data
 
     return json.loads(full_data.decode('utf-8'))
@@ -231,7 +229,7 @@ def get_sender_name(message, client_address):
 def send_response_message(msg, client_socket):
     data = json.dumps(msg).encode('utf-8')
     data_length = len(data)
-    client_socket.send(data_length.to_bytes(1024, byteorder='big'))
+    client_socket.send(data_length.to_bytes(BUFFER_SIZE, byteorder='big'))
     client_socket.send(json.dumps(msg).encode('utf-8'))
 
 if __name__ == "__main__":
