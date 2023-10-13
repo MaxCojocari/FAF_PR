@@ -1,0 +1,52 @@
+Creates a new electro-scooter entry
+---
+tags:
+  - electro-scooter
+parameters:
+  - name: electro_scooter
+    in: body
+    description: Electro Scooter to be created
+    required: true
+    schema:
+      $ref: "#/definitions/ElectroScooter"
+    examples:
+      application/json:
+        name: "Scooter 1"
+        battery_level: 10.34
+
+definitions:
+  ElectroScooter:
+    type: object
+    properties:
+      name:
+        type: string
+      battery_level:
+        type: number
+        format: float
+  SuccessMessage:
+    type: object
+    properties:
+      message:
+        type: string
+  ErrorMessage:
+    type: object
+    properties:
+      error:
+        type: string
+
+responses:
+  201:
+    description: Electro Scooter created successfully
+    schema:
+      $ref: "#/definitions/SuccessMessage"
+    examples:
+      application/json:
+        message: "Electro Scooter created successfully"
+
+  400:
+    description: Invalid request data
+    schema:
+      $ref: "#/definitions/ErrorMessage"
+    examples:
+      application/json:
+        error: "Invalid request data"

@@ -1,0 +1,41 @@
+Returns an Electro Scooter by id
+---
+tags:
+  - electro-scooter
+
+summary: Retrieves an object by id
+
+parameters:
+  - name: scooter_id
+    in: path
+    description: ID of the resource to fetch
+    required: true
+    type: integer
+
+definitions:
+  ElectroScooter:
+    type: object
+    properties:
+      name:
+        type: string
+      battery_level:
+        type: number
+        format: float
+  ErrorMessage:
+    type: object
+    properties:
+      error:
+        type: string
+
+responses:
+  200:
+    description: Successfully retrieved the resource
+    schema:
+      $ref: "#/definitions/ElectroScooter"
+  404:
+    description: Electro Scooter not found
+    schema:
+      $ref: "#/definitions/ErrorMessage"
+    examples:
+      application/json:
+        error: "Electro Scooter not found"

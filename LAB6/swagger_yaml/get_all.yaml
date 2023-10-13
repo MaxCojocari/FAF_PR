@@ -1,0 +1,37 @@
+Returns all Electro Scooter objects
+---
+tags:
+  - electro-scooter
+summary: Returns all Electro Scooters
+
+definitions:
+  ElectroScooter:
+    type: object
+    properties:
+      name:
+        type: string
+      battery_level:
+        type: number
+        format: float
+  ErrorMessage:
+    type: object
+    properties:
+      error:
+        type: string
+  ElectroScooterArray:
+    type: array
+    items:
+      $ref: "#/definitions/ElectroScooter"
+
+responses:
+  200:
+    description: Successfully retrieved the resources
+    schema:
+      $ref: "#/definitions/ElectroScooterArray"
+  401:
+    description: Incorrect password
+    schema:
+      $ref: "#/definitions/ErrorMessage"
+    examples:
+      application/json:
+        error: "Incorrect password"
