@@ -14,7 +14,7 @@ The task was to migrate Flask app form SQLite to PostgreSQL. In order to accompl
 
 2. Generating Migration Script `flask db migrate -m "init migration"`:
 
-   This command auto-generates a migration script based on the differences between the current state of the app's models (as defined in Flask) and the current state of the database. The generated script will be saved in the `migrations/versions`` directory.
+   This command auto-generates a migration script based on the differences between the current state of the app's models (as defined in Flask) and the current state of the database. The generated script will be saved in the `migrations/versions` directory.
 
 3. Applying Migration `flask db upgrade`:
 
