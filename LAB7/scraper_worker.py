@@ -3,7 +3,7 @@ import os
 import threading
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from product_page_scrapper import ProductPageScrapper
+from pdp_scraper import ProductPageScraper
 
 load_dotenv('./rabbitmq.env')
 QUEUE_NAME = 'product_urls'
@@ -37,8 +37,8 @@ def consume():
         url = body.decode()
         print(f"Crawling: {url}")
 
-        pageScrapper = ProductPageScrapper(url)
-        data = pageScrapper.scrap().to_json()
+        pageScraper = ProductPageScraper(url)
+        data = pageScraper.scrap().to_json()
         print(data)
         collection.insert_one(data)
         

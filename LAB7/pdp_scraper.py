@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
-class ProductPageScrapper:
+class ProductPageScraper:
     def __init__(self, url):
         self.url = url
         self.response = self.make_get_request(url)

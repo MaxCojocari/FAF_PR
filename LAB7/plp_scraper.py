@@ -104,4 +104,5 @@ def get_response(url):
 
 if __name__ == "__main__":
     start_url = "https://999.md/ro/list/transport/cars"
-    scrape_links(start_url, 10)
+    nr_pages = 10
+    scrape_links(start_url, nr_pages)
