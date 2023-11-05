@@ -8,6 +8,8 @@
 
 The architecture is composed of a Producer, which is a Product Listing Page (PLP) scraper, and an array of Consumers, referred to as Product Page Scrapers (or Scraper Workers). The Producer's role is to scrap URLs for all products and enqueue them. Each Worker, operating in its own thread, retrieves a single URL from the queue, scraps all pertinent information about the specific product, and then records this data into a unified MongoDB instance. This design allows for the simultaneous instantiation and management of multiple Workers, thanks to the allocation of individual threads for each.
 
+This system deals only with cars product pages from 999.md.
+
 An example of a product URL: `https://999.md/ro/84784012`.
 
 The scrapped data is stored as an array of objects in a MongoDB collection:
