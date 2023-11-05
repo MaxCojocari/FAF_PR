@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
 
-class ProductScrapper:
+class ProductPageScrapper:
     def __init__(self, url):
         self.url = url
         self.response = self.make_get_request(url)
@@ -28,7 +28,9 @@ class ProductScrapper:
         return response
 
     def set_product_name(self):
-        element = self.soup.find('header', class_='adPage__header').find('h1', itemprop='name')
+        element = self.soup.find('header', class_='adPage__header')
+        if element:
+            element = element.find('h1', itemprop='name')
         if element:
             self.product_name = element.text
 
@@ -43,17 +45,17 @@ class ProductScrapper:
             self.seller_id = element.text.strip()
 
     def set_price(self):
-        amount, currency = '', ''
+        amount, currency = "", ""
         element = self.soup.find('span', class_='adPage__content__price-feature__prices__price__value')
         if element:
             amount = element.get('content')
-        element = self.soup.find('span', class_='adPage__content__price-feature__prices__price__value')
+        element = self.soup.find('span', class_='adPage__content__price-feature__prices__price__currency')
         if element:
             currency = element.get('content')
-        self.price = {"amount": amount, "currency": currency}
+        self.price = {"amount": amount if amount else "", "currency": currency if currency else ""}
 
     def set_region(self):
-        country, locality = '', ''
+        country, locality = "", ""
         elements = self.soup.find('dl', class_="adPage__content__region grid_18")
         if elements:
             elements = elements.find_all('dd')
@@ -71,40 +73,46 @@ class ProductScrapper:
             self.tel = element.replace("tel:", "")
 
     def get_general_info(self, className):
-        ul_elements = self.soup.find('div', class_=className).find_all('ul')
-        h2_elements = self.soup.find('div', class_=className).find_all('h2')
+        ul_elements = self.soup.find('div', class_=className)
+        if ul_elements:
+            ul_elements = ul_elements.find_all('ul')
+        h2_elements = self.soup.find('div', class_=className)
+        if h2_elements:
+            h2_elements = h2_elements.find_all('h2')
 
         data = {}
         
-        if len(h2_elements) == 1:
-            first_section_name = h2_elements[0].text.strip().lower()
-            data[first_section_name] = {}
+        if h2_elements:
+            if len(h2_elements) == 1:
+                first_section_name = h2_elements[0].text.strip().lower()
+                data[first_section_name] = {}
 
-        if len(h2_elements) == 2:
-            first_section_name = h2_elements[0].text.strip().lower()
-            second_section_name = h2_elements[1].text.strip().lower()
-            data[first_section_name] = {}
-            data[second_section_name] = []
+            if len(h2_elements) == 2:
+                first_section_name = h2_elements[0].text.strip().lower()
+                second_section_name = h2_elements[1].text.strip().lower()
+                data[first_section_name] = {}
+                data[second_section_name] = []
 
-        for ul_element in ul_elements:
-            for li in ul_element.find_all('li', class_='m-value'):
-                
-                key_element = li.find('span', itemprop='name')
-                value_element = li.find('span', itemprop='value')
-                
-                if first_section_name:
-                    if key_element and value_element:
-                        key = unidecode(key_element.text.strip().lower())
-                        value = unidecode(value_element.text.strip())
-                        data[first_section_name][key] = value
+        if ul_elements:
+            for ul_element in ul_elements:
+                for li in ul_element.find_all('li', class_='m-value'):
+                    
+                    key_element = li.find('span', itemprop='name')
+                    value_element = li.find('span', itemprop='value')
+                    
+                    if first_section_name:
+                        if key_element and value_element:
+                            key = unidecode(key_element.text.strip().lower())
+                            value = unidecode(value_element.text.strip())
+                            data[first_section_name][key] = value
 
-            for li in ul_element.find_all('li', class_='m-no_value'):
-                key_element = li.find('span', itemprop='name')
-                
-                if second_section_name:
-                    if key_element:
-                        key = unidecode(key_element.text.strip().lower())
-                        data[second_section_name].append(key)
+                for li in ul_element.find_all('li', class_='m-no_value'):
+                    key_element = li.find('span', itemprop='name')
+                    
+                    if second_section_name:
+                        if key_element:
+                            key = unidecode(key_element.text.strip().lower())
+                            data[second_section_name].append(key)
         
         return data
     
