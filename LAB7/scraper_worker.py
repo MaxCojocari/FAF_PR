@@ -52,7 +52,7 @@ def consume():
     channel.start_consuming()
 
 def main():
-    num_threads = 8
+    num_threads = 20
 
     threads = []
     for _ in range(num_threads):
