@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, methods=["GET", "POST", "PUT", "DELETE"])
+CORS(app)
 
 mail_service = MailService(
     os.getenv('EMAIL_SENDER'), 
@@ -21,7 +21,7 @@ def send_email_to_recipients():
     try:
         data = request.get_json()
         mail_service.send_email(data["subject"], data["body"], data["recipients"])
-        return {"message": "Email sent successfully"}, 200
+        return {"message": "Email sent successfully!"}, 200
     except Exception as e:
         return {"error": str(e)}, 500
     
@@ -39,9 +39,6 @@ def upload_file():
         link = mail_service.upload_file(file)
         
         return {"ftp-link": link}, 200
-    
-        # file.save("uploaded_files/" + file.filename)
-        # return {"message": "File uploaded successfully"}, 200
         
     except Exception as e:
         return {"error": str(e)}, 500  

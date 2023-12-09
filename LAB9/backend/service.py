@@ -3,11 +3,9 @@ from email.mime.text import MIMEText
 from ftplib import FTP
 from urllib.parse import urlparse
 
-# Connect to the FTP server
 ftp_server = '138.68.98.108'
 ftp_username = 'yourusername'
 ftp_passwd = 'yourusername'
-
 
 class MailService():
     def __init__(self, sender, email_password, ftp_username, ftp_passwd) -> None:
@@ -23,16 +21,13 @@ class MailService():
         msg['Subject'] = subject
         msg['From'] = self.sender
         msg['To'] = ', '.join(recipients)
-        # with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-        #     smtp_server.login(self.sender, self.password)
-        #     smtp_server.sendmail(self.sender, recipients, msg.as_string())
         self.smtp_server.sendmail(self.sender, recipients, msg.as_string())
-        print("Message sent!")
 
     def upload_file(self, file):
-        remote_file_path = 'faf213/MaxCojocari/' + file.filename
+        file_name = file.filename.replace(" ", "_")
+        remote_file_path = 'faf213/MaxCojocari/' + file_name
         self.ftp.storbinary(f'STOR {remote_file_path}', file)
-        return f"ftp://yourusername:yourusername@138.68.98.108/faf213/MaxCojocari/{file.filename}"
+        return f"ftp://yourusername:yourusername@138.68.98.108/faf213/MaxCojocari/{file_name}"
     
     def download_file(self, file_name):        
         with open(f"uploaded_files/{file_name}", "wb") as file:

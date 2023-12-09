@@ -10,9 +10,11 @@ export const sendEmail = async (data: Object) => {
     .catch((e) => console.log(e));
 };
 
-export const uploadFileToFtpServer = async (data: Object) => {
+export const uploadFileToFtpServer = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
   return axios
-    .post(`${API_URL}/api/email/attachment`, { ...data })
+    .post(`${API_URL}/api/email/attachment`, formData)
     .then((res) => {
       return res;
     })
