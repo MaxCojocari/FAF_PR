@@ -12,6 +12,7 @@ CORS(app)
 mail_service = MailService(
     os.getenv('EMAIL_SENDER'), 
     os.getenv('APP_PASSWORD'), 
+    os.getenv('FTP_SERVER'),
     os.getenv('FTP_USERNAME'), 
     os.getenv('FTP_PASSWORD')
 )

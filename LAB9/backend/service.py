@@ -1,14 +1,9 @@
 import smtplib
 from email.mime.text import MIMEText
 from ftplib import FTP
-from urllib.parse import urlparse
-
-ftp_server = '138.68.98.108'
-ftp_username = 'yourusername'
-ftp_passwd = 'yourusername'
 
 class MailService():
-    def __init__(self, sender, email_password, ftp_username, ftp_passwd) -> None:
+    def __init__(self, sender, email_password, ftp_server, ftp_username, ftp_passwd) -> None:
         self.sender = sender
         self.emailpassword = email_password
         self.smtp_server = smtplib.SMTP_SSL('smtp.gmail.com', 465)

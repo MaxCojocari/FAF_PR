@@ -5,6 +5,10 @@
 from ftplib import FTP
 ftp = FTP('138.68.98.108')
 ftp.login(user='yourusername', passwd='yourusername')
+
+files = ['john_rickman.jpeg', 'bostan.jpg', 'ciorba.jpg', 'xyz.jpeg']
+for file in files:
+    ftp.delete(f"faf213/MaxCojocari/{file}")
 # ftp.delete('faf213/MaxCojocari/bostan.jpg')
 # ftp.delete('faf213/MaxCojocari/ciorba.jpg')
 
